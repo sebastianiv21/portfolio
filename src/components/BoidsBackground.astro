@@ -10,7 +10,7 @@
 ></canvas>
 
 <script>
-  type Boid = { x: number; y: number; vx: number; vy: number; g: number };
+  type Boid = { x: number; y: number; vx: number; vy: number; tier: number };
 
   const canvas = document.getElementById('boids') as HTMLCanvasElement | null;
   const ctx = canvas?.getContext('2d') ?? null;
@@ -19,8 +19,8 @@
 
     // Gruvbox: yellow accent + dim foreground tones for depth.
     const COLORS = ['250,189,47', '215,153,33', '168,153,132'];
-    // Bird-flight chevron glyphs, rotated to heading. Pure ASCII.
-    const GLYPHS = ['>', '>', '»', 'v'];
+    // Single consistent bird glyph, rotated to its heading. Pure ASCII.
+    const GLYPH = '>';
 
     let w = 0;
     let h = 0;
@@ -28,14 +28,32 @@
     let boids: Boid[] = [];
     let raf = 0;
     let last = 0;
+
+    // Cursor (scatter target).
     const mouse = { x: -9999, y: -9999, active: false };
-    let wind = 0; // horizontal drift driven by scroll
+    let mouseIdle = 0;
+
+    // Shared, slowly-drifting wind heading keeps the whole flock coherent.
+    const wind = { x: 1, y: 0 };
+    let windAngle = 0;
+    let scrollBias = 0; // vertical nudge from scrolling
 
     const FONT_SIZE = 14;
-    const PERCEPT = 64;
-    const SEPARATION = 26;
-    const MAX_SPEED = 1.15;
-    const MAX_FORCE = 0.045;
+    const PERCEPT = 72;
+    const SEPARATION = 28;
+    const MAX_SPEED = 1.6;
+    const MAX_FORCE = 0.06;
+    const MAX_FLEE_SPEED = 3.2;
+
+    // behavior weights
+    const W_ALIGN = 1.3;
+    const W_COHESION = 0.9;
+    const W_SEPARATION = 1.7;
+    const W_WIND = 0.4;
+
+    // cursor scatter
+    const FLEE_R = 160;
+    const FLEE_STRENGTH = 0.9;
 
     const rand = (a: number, b: number) => a + Math.random() * (b - a);
 
@@ -59,25 +77,47 @@
 
       const want = targetCount();
       while (boids.length < want) {
-        const a = rand(0, Math.PI * 2);
+        // spawn already aligned-ish to the wind so it reads as a flock at once
+        const a = windAngle + rand(-0.5, 0.5);
         boids.push({
           x: rand(0, w),
           y: rand(0, h),
           vx: Math.cos(a) * MAX_SPEED,
           vy: Math.sin(a) * MAX_SPEED,
-          g: Math.floor(Math.random() * GLYPHS.length),
+          tier: Math.floor(Math.random() * COLORS.length),
         });
       }
       boids.length = want;
     }
 
+    // Reynolds steering: turn a desired direction into a force limited to MAX_FORCE.
+    function steer(dx: number, dy: number, b: Boid, out: { x: number; y: number }) {
+      const m = Math.hypot(dx, dy);
+      if (m === 0) {
+        out.x = 0;
+        out.y = 0;
+        return;
+      }
+      let fx = (dx / m) * MAX_SPEED - b.vx;
+      let fy = (dy / m) * MAX_SPEED - b.vy;
+      const fm = Math.hypot(fx, fy);
+      if (fm > MAX_FORCE) {
+        fx = (fx / fm) * MAX_FORCE;
+        fy = (fy / fm) * MAX_FORCE;
+      }
+      out.x = fx;
+      out.y = fy;
+    }
+
+    const _s = { x: 0, y: 0 };
+
     function step(b: Boid) {
       let ax = 0;
-      let ay = 0; // alignment
+      let ay = 0; // sum of neighbor velocities (alignment)
       let cx = 0;
-      let cy = 0; // cohesion
+      let cy = 0; // sum of neighbor positions (cohesion)
       let sx = 0;
-      let sy = 0; // separation
+      let sy = 0; // separation accumulator
       let n = 0;
 
       for (const o of boids) {
@@ -91,57 +131,62 @@
           cx += o.x;
           cy += o.y;
           if (d2 < SEPARATION * SEPARATION) {
-            const d = Math.sqrt(d2) || 1;
-            sx -= dx / d;
-            sy -= dy / d;
+            const d = Math.sqrt(d2);
+            sx -= dx / d / d; // weight away-vector by closeness
+            sy -= dy / d / d;
           }
           n++;
         }
       }
 
-      let fx = wind;
-      let fy = 0;
+      let accx = 0;
+      let accy = 0;
+
       if (n > 0) {
-        // alignment
-        fx += (ax / n) * 0.6;
-        fy += (ay / n) * 0.6;
-        // cohesion
-        fx += (cx / n - b.x) * 0.0009;
-        fy += (cy / n - b.y) * 0.0009;
+        // alignment — the key fix for "pointing in all directions"
+        steer(ax / n, ay / n, b, _s);
+        accx += _s.x * W_ALIGN;
+        accy += _s.y * W_ALIGN;
+        // cohesion — toward neighbor center
+        steer(cx / n - b.x, cy / n - b.y, b, _s);
+        accx += _s.x * W_COHESION;
+        accy += _s.y * W_COHESION;
         // separation
-        fx += sx * 0.9;
-        fy += sy * 0.9;
+        if (sx !== 0 || sy !== 0) {
+          steer(sx, sy, b, _s);
+          accx += _s.x * W_SEPARATION;
+          accy += _s.y * W_SEPARATION;
+        }
       }
 
-      // cursor: gentle repulsion so the flock parts around the pointer
+      // shared wind heading — coherent global drift
+      steer(wind.x, wind.y, b, _s);
+      accx += _s.x * W_WIND;
+      accy += _s.y * W_WIND;
+
+      b.vx += accx;
+      b.vy += accy;
+
+      // cursor scatter — applied straight to velocity, outside the MAX_FORCE clamp
+      let speedCap = MAX_SPEED;
       if (mouse.active) {
         const dx = b.x - mouse.x;
         const dy = b.y - mouse.y;
         const d2 = dx * dx + dy * dy;
-        const R = 120;
-        if (d2 < R * R && d2 > 0) {
+        if (d2 < FLEE_R * FLEE_R && d2 > 0) {
           const d = Math.sqrt(d2);
-          const f = (1 - d / R) * 0.6;
-          fx += (dx / d) * f;
-          fy += (dy / d) * f;
+          const f = (1 - d / FLEE_R) ** 2 * FLEE_STRENGTH;
+          b.vx += (dx / d) * f;
+          b.vy += (dy / d) * f;
+          speedCap = MAX_FLEE_SPEED; // let the veer-away be visibly faster
         }
       }
 
-      // clamp steering force
-      const fm = Math.hypot(fx, fy);
-      if (fm > MAX_FORCE) {
-        fx = (fx / fm) * MAX_FORCE;
-        fy = (fy / fm) * MAX_FORCE;
-      }
-
-      b.vx += fx;
-      b.vy += fy;
-
-      // clamp speed
+      // clamp speed (relaxed cap while fleeing)
       const sm = Math.hypot(b.vx, b.vy);
-      if (sm > MAX_SPEED) {
-        b.vx = (b.vx / sm) * MAX_SPEED;
-        b.vy = (b.vy / sm) * MAX_SPEED;
+      if (sm > speedCap) {
+        b.vx = (b.vx / sm) * speedCap;
+        b.vy = (b.vy / sm) * speedCap;
       }
 
       b.x += b.vx;
@@ -160,14 +205,22 @@
       for (const b of boids) {
         const angle = Math.atan2(b.vy, b.vx);
         const speed = Math.hypot(b.vx, b.vy);
-        const alpha = 0.4 + (speed / MAX_SPEED) * 0.55;
+        const alpha = 0.4 + Math.min(speed / MAX_SPEED, 1) * 0.55;
         ctx!.save();
         ctx!.translate(b.x, b.y);
         ctx!.rotate(angle);
-        ctx!.fillStyle = `rgba(${COLORS[b.g % COLORS.length]},${alpha.toFixed(2)})`;
-        ctx!.fillText(GLYPHS[b.g], 0, 0);
+        ctx!.fillStyle = `rgba(${COLORS[b.tier]},${alpha.toFixed(2)})`;
+        ctx!.fillText(GLYPH, 0, 0);
         ctx!.restore();
       }
+    }
+
+    function updateWind(t: number) {
+      // slow wander: ~one full revolution per ~60s, plus scroll bias
+      windAngle = Math.sin(t / 30000) * Math.PI;
+      wind.x = Math.cos(windAngle);
+      wind.y = Math.sin(windAngle) * 0.5 + scrollBias;
+      scrollBias *= 0.95; // decay scroll nudge
     }
 
     function frame(t: number) {
@@ -175,7 +228,8 @@
       // throttle to ~30fps
       if (t - last < 33) return;
       last = t;
-      wind *= 0.94; // decay scroll-driven drift
+      if (mouse.active && t - mouseIdle > 300) mouse.active = false;
+      updateWind(t);
       for (const b of boids) step(b);
       draw();
     }
@@ -183,6 +237,7 @@
     function start() {
       cancelAnimationFrame(raf);
       if (reduceMotion.matches) {
+        updateWind(0);
         for (const b of boids) step(b);
         draw(); // single static frame
         return;
@@ -205,8 +260,9 @@
       mouse.x = e.clientX;
       mouse.y = e.clientY;
       mouse.active = true;
+      mouseIdle = performance.now();
     });
-    window.addEventListener('pointerleave', () => (mouse.active = false));
+    document.addEventListener('pointerleave', () => (mouse.active = false));
 
     let lastScroll = window.scrollY;
     window.addEventListener(
@@ -214,7 +270,7 @@
       () => {
         const dy = window.scrollY - lastScroll;
         lastScroll = window.scrollY;
-        wind += Math.max(-0.04, Math.min(0.04, dy * 0.002));
+        scrollBias += Math.max(-0.6, Math.min(0.6, dy * 0.01));
       },
       { passive: true },
     );
