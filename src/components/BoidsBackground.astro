@@ -19,8 +19,8 @@
 
     // Gruvbox: yellow accent + dim foreground tones for depth.
     const COLORS = ['250,189,47', '215,153,33', '168,153,132'];
-    // Single consistent bird glyph, rotated to its heading. Pure ASCII.
-    const GLYPH = '>';
+    // Wing-beat: chevron opens/closes (closed -> open -> wide), rotated to heading.
+    const FLAP = ['›', '>', 'ᐳ'];
 
     let w = 0;
     let h = 0;
@@ -202,15 +202,18 @@
 
     function draw() {
       ctx!.clearRect(0, 0, w, h);
+      const t = performance.now();
       for (const b of boids) {
         const angle = Math.atan2(b.vy, b.vx);
         const speed = Math.hypot(b.vx, b.vy);
         const alpha = 0.4 + Math.min(speed / MAX_SPEED, 1) * 0.55;
+        // cycle flap frames, phase offset per boid so the flock isn't synced
+        const f = Math.floor(t / 130 + b.x * 0.3) % FLAP.length;
         ctx!.save();
         ctx!.translate(b.x, b.y);
         ctx!.rotate(angle);
         ctx!.fillStyle = `rgba(${COLORS[b.tier]},${alpha.toFixed(2)})`;
-        ctx!.fillText(GLYPH, 0, 0);
+        ctx!.fillText(FLAP[f], 0, 0);
         ctx!.restore();
       }
     }
