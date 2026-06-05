@@ -1,0 +1,56 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SectionMark from '../../components/SectionMark.astro';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+---
+
+<BaseLayout
+  title="Blog — Luis Ibarra"
+  description="Notes on DevOps, observability, and platform engineering."
+>
+  <section class="mx-auto max-w-5xl px-6 py-20">
+    <SectionMark index="00" label="Writing" title="Blog" />
+
+    {
+      posts.length === 0 ? (
+        <p class="text-fg-dim">No posts yet — check back soon.</p>
+      ) : (
+        <ul class="space-y-px border border-line bg-line">
+          {posts.map((post) => (
+            <li>
+              <a
+                href={`/blog/${post.id}`}
+                class="group block bg-bg p-6 transition-colors hover:bg-bg-raised sm:p-8"
+              >
+                <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+                  <h2 class="text-2xl text-fg transition-colors group-hover:text-accent">
+                    {post.data.title}
+                  </h2>
+                  <time
+                    datetime={post.data.pubDate.toISOString()}
+                    class="font-mono text-sm text-fg-faint"
+                  >
+                    {fmt(post.data.pubDate)}
+                  </time>
+                </div>
+                <p class="mt-2 max-w-2xl text-fg-dim">{post.data.description}</p>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </section>
+</BaseLayout>

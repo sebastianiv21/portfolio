@@ -1,0 +1,59 @@
+---
+import SectionMark from './SectionMark.astro';
+import { education, certifications, languages } from '../data/site';
+---
+
+<section id="education" class="mx-auto max-w-5xl scroll-mt-20 px-6 py-24">
+  <SectionMark index="05" label="Credentials" title="Education & Certs" />
+
+  <div class="grid gap-10 md:grid-cols-2">
+    <!-- Education + Languages -->
+    <div class="space-y-10">
+      <div>
+        <h3 class="tech-label mb-4">Education</h3>
+        <ul class="space-y-5">
+          {
+            education.map((e) => (
+              <li class="border-l-2 border-line pl-4">
+                <p class="text-fg">{e.credential}</p>
+                <p class="font-mono text-sm text-fg-dim">{e.school}</p>
+                <p class="font-mono text-xs text-fg-faint">{e.period}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="tech-label mb-4">Languages</h3>
+        <ul class="flex flex-wrap gap-3">
+          {
+            languages.map((l) => (
+              <li class="border border-line px-3 py-1.5 text-sm text-fg-dim">
+                <span aria-hidden="true">{l.flag}</span> {l.name}
+                <span class="text-accent"> · {l.level}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+
+    <!-- Certifications -->
+    <div>
+      <h3 class="tech-label mb-4">Certifications</h3>
+      <ul class="space-y-4">
+        {
+          certifications.map((c) => (
+            <li class="border-l-2 border-accent pl-4">
+              <p class="text-fg">{c.name}</p>
+              <p class="font-mono text-sm text-fg-dim">
+                {c.issuer} &middot; {c.date}
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>

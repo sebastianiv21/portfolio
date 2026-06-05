@@ -1,0 +1,154 @@
+@import '@fontsource-variable/space-grotesk';
+@import '@fontsource-variable/jetbrains-mono';
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+
+/* ── Design tokens: Gruvbox (dark), yellow-forward ───────────────────── */
+@theme {
+  /* surfaces */
+  --color-bg-hard: #1d2021;
+  --color-bg: #282828;
+  --color-bg-raised: #32302f;
+  --color-bg-raised-2: #3c3836;
+  --color-line: #504945;
+
+  /* foreground */
+  --color-fg: #ebdbb2;
+  --color-fg-dim: #a89984;
+  --color-fg-faint: #928374;
+
+  /* accents — yellow is primary, orange secondary */
+  --color-accent: #fabd2f;
+  --color-accent-deep: #d79921;
+  --color-orange: #fe8019;
+  --color-orange-deep: #d65d0e;
+  --color-aqua: #8ec07c;
+  --color-red: #fb4934;
+
+  /* type */
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular',
+    'Menlo', monospace;
+  --font-display: 'Space Grotesk Variable', system-ui, sans-serif;
+}
+
+/* ── Base ────────────────────────────────────────────────────────────── */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    color-scheme: dark;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    background-color: var(--color-bg-hard);
+    color: var(--color-fg);
+    font-family: var(--font-mono);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    line-height: 0.95;
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-bg-hard);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  /* thin gruvbox scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-bg-hard);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-line);
+    border: 2px solid var(--color-bg-hard);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-fg-faint);
+  }
+}
+
+/* ── Reusable Marathon-flavored bits ─────────────────────────────────── */
+@layer components {
+  /* corner registration / crop marks on a relatively-positioned box */
+  .crop-marks::before,
+  .crop-marks::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-color: var(--color-accent);
+    pointer-events: none;
+  }
+  .crop-marks::before {
+    top: 0;
+    left: 0;
+    border-top: 2px solid;
+    border-left: 2px solid;
+  }
+  .crop-marks::after {
+    bottom: 0;
+    right: 0;
+    border-bottom: 2px solid;
+    border-right: 2px solid;
+  }
+
+  /* technical mono label, e.g. "// 01 — ABOUT" */
+  .tech-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+
+  /* Gruvbox theming for blog prose (Tailwind Typography) */
+  .prose-gruvbox {
+    --tw-prose-body: var(--color-fg-dim);
+    --tw-prose-headings: var(--color-fg);
+    --tw-prose-lead: var(--color-fg-dim);
+    --tw-prose-links: var(--color-accent);
+    --tw-prose-bold: var(--color-fg);
+    --tw-prose-counters: var(--color-fg-faint);
+    --tw-prose-bullets: var(--color-accent);
+    --tw-prose-hr: var(--color-line);
+    --tw-prose-quotes: var(--color-fg);
+    --tw-prose-quote-borders: var(--color-accent);
+    --tw-prose-captions: var(--color-fg-faint);
+    --tw-prose-code: var(--color-accent);
+    --tw-prose-pre-code: var(--color-fg);
+    --tw-prose-pre-bg: var(--color-bg-hard);
+    --tw-prose-th-borders: var(--color-line);
+    --tw-prose-td-borders: var(--color-line);
+  }
+  .prose-gruvbox :where(h1, h2, h3, h4) {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+  }
+  .prose-gruvbox :where(code):not(pre code)::before,
+  .prose-gruvbox :where(code):not(pre code)::after {
+    content: '';
+  }
+}

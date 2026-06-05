@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="404 — Not Found" description="Page not found.">
+  <section
+    class="mx-auto flex min-h-[calc(100svh-3.5rem)] max-w-5xl flex-col justify-center px-6 py-20"
+  >
+    <p class="tech-label mb-6">// ERR — 404</p>
+    <h1 class="text-6xl text-fg sm:text-8xl">
+      Lost in <span class="text-accent">flight</span>
+    </h1>
+    <p class="mt-6 max-w-xl text-lg text-fg-dim">
+      This page drifted off course. Nothing here but the flock.
+    </p>
+    <a
+      href="/"
+      class="mt-10 inline-block self-start border-2 border-accent bg-accent px-5 py-2.5 text-sm font-bold uppercase tracking-wider text-bg-hard transition-colors hover:border-accent-deep hover:bg-accent-deep"
+    >
+      Back Home
+    </a>
+  </section>
+</BaseLayout>

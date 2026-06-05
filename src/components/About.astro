@@ -1,0 +1,38 @@
+---
+import SectionMark from './SectionMark.astro';
+import { about, focus } from '../data/site';
+
+// turn *emphasis* markers from the data into <em> spans
+function emph(text: string) {
+  return text.replace(
+    /\*(.+?)\*/g,
+    '<em class="not-italic text-accent">$1</em>',
+  );
+}
+---
+
+<section id="about" class="mx-auto max-w-5xl scroll-mt-20 px-6 py-24">
+  <SectionMark index="01" label="About" />
+
+  <div class="grid gap-10 md:grid-cols-[2fr_1fr]">
+    <div class="space-y-5 text-lg leading-relaxed text-fg-dim">
+      {about.map((p) => <p set:html={emph(p)} />)}
+    </div>
+
+    <aside class="space-y-4">
+      <p class="tech-label">Currently</p>
+      <ul class="space-y-3">
+        {
+          focus.map((f) => (
+            <li class="flex gap-3 text-fg-dim">
+              <span class="text-accent" aria-hidden="true">
+                ▹
+              </span>
+              {f}
+            </li>
+          ))
+        }
+      </ul>
+    </aside>
+  </div>
+</section>

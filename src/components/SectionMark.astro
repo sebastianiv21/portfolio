@@ -1,0 +1,17 @@
+---
+interface Props {
+  index: string;
+  label: string;
+  title?: string;
+}
+const { index, label, title } = Astro.props;
+---
+
+<div class="mb-12">
+  <span class="tech-label">// {index} &mdash; {label}</span>
+  {
+    title && (
+      <h2 class="mt-3 text-4xl text-fg sm:text-5xl">{title}</h2>
+    )
+  }
+</div>

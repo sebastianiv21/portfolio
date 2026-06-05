@@ -1,0 +1,44 @@
+---
+import SectionMark from './SectionMark.astro';
+import { experience } from '../data/site';
+---
+
+<section id="experience" class="mx-auto max-w-5xl scroll-mt-20 px-6 py-24">
+  <SectionMark index="03" label="Experience" title="Where I've Worked" />
+
+  <div class="space-y-px border border-line bg-line">
+    {
+      experience.map((job, i) => (
+        <article class="bg-bg p-6 sm:p-8">
+          <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+            <h3 class="text-2xl text-fg">
+              {job.role}
+            </h3>
+            <span class="font-mono text-sm text-accent">{job.period}</span>
+          </div>
+
+          <p class="mt-1 font-mono text-sm text-fg-dim">
+            {job.company} &middot; {job.location}
+          </p>
+
+          <p class="mt-4 max-w-3xl text-fg-dim">{job.context}</p>
+
+          <ul class="mt-5 space-y-2.5">
+            {job.highlights.map((h) => (
+              <li class="flex gap-3 text-fg-dim">
+                <span class="mt-1 shrink-0 text-accent" aria-hidden="true">
+                  ▹
+                </span>
+                <span>{h}</span>
+              </li>
+            ))}
+          </ul>
+
+          <span class="mt-6 block font-mono text-xs text-fg-faint">
+            FIG. {String(i + 1).padStart(2, '0')}
+          </span>
+        </article>
+      ))
+    }
+  </div>
+</section>

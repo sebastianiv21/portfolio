@@ -1,0 +1,46 @@
+---
+import { site } from '../data/site';
+---
+
+<section
+  class="relative mx-auto flex min-h-[calc(100svh-3.5rem)] max-w-5xl flex-col justify-center px-6 py-20"
+>
+  <p class="tech-label mb-6">
+    {site.location} &nbsp;//&nbsp; {site.availability}
+  </p>
+
+  <h1 class="text-fg">
+    <span class="block text-5xl sm:text-7xl lg:text-8xl">Luis</span>
+    <span class="block text-5xl text-accent sm:text-7xl lg:text-8xl">Ibarra</span>
+  </h1>
+
+  <p
+    class="mt-8 max-w-2xl text-lg leading-relaxed text-fg-dim sm:text-xl"
+  >
+    <span class="text-fg">{site.title}</span> &mdash; building reliable
+    infrastructure, CI/CD automation, and observability. {site.subtitle}.
+  </p>
+
+  <div class="mt-10 flex flex-wrap gap-4">
+    <a
+      href="/#work"
+      class="border-2 border-accent bg-accent px-5 py-2.5 text-sm font-bold uppercase tracking-wider text-bg-hard transition-colors hover:bg-accent-deep hover:border-accent-deep"
+    >
+      View Work
+    </a>
+    <a
+      href="/#contact"
+      class="border-2 border-line px-5 py-2.5 text-sm font-bold uppercase tracking-wider text-fg transition-colors hover:border-accent hover:text-accent"
+    >
+      Get in Touch
+    </a>
+  </div>
+
+  <a
+    href="/#about"
+    class="mt-16 inline-flex items-center gap-2 self-start text-xs uppercase tracking-[0.25em] text-fg-faint transition-colors hover:text-accent"
+    aria-label="Scroll to about"
+  >
+    Scroll <span aria-hidden="true">↓</span>
+  </a>
+</section>

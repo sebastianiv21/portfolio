@@ -1,0 +1,55 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+const { post } = Astro.props;
+const { title, description, pubDate, updatedDate, tags } = post.data;
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+---
+
+<BaseLayout title={`${title} — Luis Ibarra`} description={description}>
+  <article class="mx-auto max-w-3xl px-6 py-20">
+    <a
+      href="/blog"
+      class="tech-label inline-block transition-colors hover:text-fg"
+      >&larr; All Posts</a
+    >
+
+    <header class="mt-8 border-b border-line pb-8">
+      <h1 class="text-4xl text-fg sm:text-5xl">{title}</h1>
+      <p class="mt-4 font-mono text-sm text-fg-faint">
+        <time datetime={pubDate.toISOString()}>{fmt(pubDate)}</time>
+        {
+          updatedDate && (
+            <span> &middot; updated {fmt(updatedDate)}</span>
+          )
+        }
+      </p>
+      {
+        tags.length > 0 && (
+          <ul class="mt-4 flex flex-wrap gap-2">
+            {tags.map((t) => (
+              <li class="border border-line px-2.5 py-0.5 font-mono text-xs text-fg-dim">
+                #{t}
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
+
+    <div class="prose prose-gruvbox mt-10 max-w-none">
+      <slot />
+    </div>
+  </article>
+</BaseLayout>

@@ -1,0 +1,54 @@
+---
+import SectionMark from './SectionMark.astro';
+import { projects } from '../data/site';
+---
+
+<section id="work" class="mx-auto max-w-5xl scroll-mt-20 px-6 py-24">
+  <SectionMark index="04" label="Work" title="Selected Work" />
+
+  <div class="space-y-8">
+    {
+      projects.map((p) => (
+        <article class="crop-marks relative border border-line bg-bg p-8 sm:p-10">
+          <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+            <h3 class="text-3xl text-fg">{p.name}</h3>
+            <span class="font-mono text-sm text-accent">{p.period}</span>
+          </div>
+
+          <p class="mt-2 text-lg text-orange">{p.tagline}</p>
+
+          <p class="mt-5 max-w-3xl leading-relaxed text-fg-dim">
+            {p.description}
+          </p>
+
+          <ul class="mt-6 flex flex-wrap gap-2">
+            {p.stack.map((s) => (
+              <li class="border border-line px-2.5 py-1 font-mono text-xs text-fg-dim">
+                {s}
+              </li>
+            ))}
+          </ul>
+
+          <a
+            href={p.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="mt-8 inline-flex items-center gap-2 border-2 border-line px-4 py-2 text-sm font-bold uppercase tracking-wider text-fg transition-colors hover:border-accent hover:text-accent"
+          >
+            View on GitHub <span aria-hidden="true">↗</span>
+          </a>
+        </article>
+      ))
+    }
+  </div>
+
+  <p class="mt-8 font-mono text-sm text-fg-faint">
+    More on
+    <a
+      href="https://github.com/sebastianiv21"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="text-fg-dim underline decoration-line underline-offset-4 transition-colors hover:text-accent">GitHub →</a
+    >
+  </p>
+</section>
