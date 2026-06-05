@@ -208,7 +208,7 @@
         const speed = Math.hypot(b.vx, b.vy);
         const alpha = 0.4 + Math.min(speed / MAX_SPEED, 1) * 0.55;
         // cycle flap frames, phase offset per boid so the flock isn't synced
-        const f = Math.floor(t / 130 + b.x * 0.3) % FLAP.length;
+        const f = Math.floor(t / 300 + b.x * 0.3) % FLAP.length;
         ctx!.save();
         ctx!.translate(b.x, b.y);
         ctx!.rotate(angle);
