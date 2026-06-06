@@ -123,32 +123,36 @@
     color: var(--color-accent);
   }
 
-  /* Gruvbox theming for blog prose (Tailwind Typography) */
-  .prose-gruvbox {
-    --tw-prose-body: var(--color-fg-dim);
-    --tw-prose-headings: var(--color-fg);
-    --tw-prose-lead: var(--color-fg-dim);
-    --tw-prose-links: var(--color-accent);
-    --tw-prose-bold: var(--color-fg);
-    --tw-prose-counters: var(--color-fg-faint);
-    --tw-prose-bullets: var(--color-accent);
-    --tw-prose-hr: var(--color-line);
-    --tw-prose-quotes: var(--color-fg);
-    --tw-prose-quote-borders: var(--color-accent);
-    --tw-prose-captions: var(--color-fg-faint);
-    --tw-prose-code: var(--color-accent);
-    --tw-prose-pre-code: var(--color-fg);
-    --tw-prose-pre-bg: var(--color-bg-hard);
-    --tw-prose-th-borders: var(--color-line);
-    --tw-prose-td-borders: var(--color-line);
-  }
-  .prose-gruvbox :where(h1, h2, h3, h4) {
-    font-family: var(--font-display);
-    text-transform: uppercase;
-    letter-spacing: -0.02em;
-  }
-  .prose-gruvbox :where(code):not(pre code)::before,
-  .prose-gruvbox :where(code):not(pre code)::after {
-    content: '';
-  }
+}
+
+/* ── Blog prose (Tailwind Typography), gruvbox palette ───────────────────
+   Unlayered on purpose: the plugin's base `.prose` lives in the `utilities`
+   layer, and cascade layers outrank specificity — so these overrides must be
+   unlayered (unlayered styles beat any layer) to take effect. */
+.prose.prose-gruvbox {
+  --tw-prose-body: var(--color-fg);
+  --tw-prose-headings: var(--color-fg);
+  --tw-prose-lead: var(--color-fg-dim);
+  --tw-prose-links: var(--color-accent);
+  --tw-prose-bold: var(--color-fg);
+  --tw-prose-counters: var(--color-fg-faint);
+  --tw-prose-bullets: var(--color-accent);
+  --tw-prose-hr: var(--color-line);
+  --tw-prose-quotes: var(--color-fg);
+  --tw-prose-quote-borders: var(--color-accent);
+  --tw-prose-captions: var(--color-fg-faint);
+  --tw-prose-code: var(--color-accent);
+  --tw-prose-pre-code: var(--color-fg);
+  --tw-prose-pre-bg: var(--color-bg-hard);
+  --tw-prose-th-borders: var(--color-line);
+  --tw-prose-td-borders: var(--color-line);
+}
+.prose.prose-gruvbox :where(h1, h2, h3, h4) {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+.prose.prose-gruvbox :where(code):not(pre code)::before,
+.prose.prose-gruvbox :where(code):not(pre code)::after {
+  content: '';
 }
