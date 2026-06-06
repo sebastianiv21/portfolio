@@ -19,8 +19,6 @@
 
     // Gruvbox: yellow accent + dim foreground tones for depth.
     const COLORS = ['250,189,47', '215,153,33', '168,153,132'];
-    // Single consistent bird glyph, rotated to its heading. Pure ASCII.
-    const GLYPH = '>';
 
     let w = 0;
     let h = 0;
@@ -202,15 +200,27 @@
 
     function draw() {
       ctx!.clearRect(0, 0, w, h);
+      const t = performance.now();
       for (const b of boids) {
         const angle = Math.atan2(b.vy, b.vx);
         const speed = Math.hypot(b.vx, b.vy);
         const alpha = 0.4 + Math.min(speed / MAX_SPEED, 1) * 0.55;
+        // wing-beat: wingtips rise and fall, phase offset per boid
+        const flap = Math.sin(t / 160 + b.x * 0.04 + b.y * 0.04);
+        const L = 4;
+        const droop = (0.35 + flap * 0.5) * L;
         ctx!.save();
         ctx!.translate(b.x, b.y);
         ctx!.rotate(angle);
-        ctx!.fillStyle = `rgba(${COLORS[b.tier]},${alpha.toFixed(2)})`;
-        ctx!.fillText(GLYPH, 0, 0);
+        ctx!.strokeStyle = `rgba(${COLORS[b.tier]},${alpha.toFixed(2)})`;
+        ctx!.lineWidth = 1.1;
+        ctx!.lineCap = 'round';
+        ctx!.beginPath();
+        // gull "M": wingtips trail back (-x), head leads (+x), wings curved
+        ctx!.moveTo(-L, -droop);
+        ctx!.quadraticCurveTo(0, -1, L * 0.6, 0);
+        ctx!.quadraticCurveTo(0, 1, -L, droop);
+        ctx!.stroke();
         ctx!.restore();
       }
     }
