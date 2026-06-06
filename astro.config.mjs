@@ -10,7 +10,9 @@ export default defineConfig({
   site: 'https://luisibarra.dev',
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    // dev-only: node_modules is a symlink outside this worktree (variant compare)
+    server: { fs: { strict: false } }
   },
 
   integrations: [mdx(), sitemap()]
