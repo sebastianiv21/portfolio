@@ -15,18 +15,20 @@ const C = {
   accent: '#fabd2f',
 };
 
-// scattered chevrons echoing the boids background
+// scattered gull silhouettes echoing the boids flock (head leads +x, rotated)
+const gull = (x, y, deg, o, L = 16) => {
+  const d = L * 0.5; // wingtip droop
+  return `<g transform="translate(${x} ${y}) rotate(${deg})" fill="none" stroke="${C.accent}" stroke-opacity="${o}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M ${-L} ${-d} Q 0 -2 ${L * 0.6} 0 Q 0 2 ${-L} ${d}"/></g>`;
+};
 const birds = [
-  [980, 120, 18, 0.9],
-  [1040, 180, -25, 0.6],
-  [900, 90, 10, 0.5],
-  [1080, 250, 30, 0.7],
-  [950, 300, -15, 0.45],
+  [980, 120, 18, 0.9, 18],
+  [1040, 185, -22, 0.65, 14],
+  [905, 95, 8, 0.5, 12],
+  [1085, 255, 26, 0.7, 16],
+  [950, 305, -14, 0.45, 13],
+  [1120, 150, -8, 0.55, 15],
 ]
-  .map(
-    ([x, y, r, o]) =>
-      `<text x="${x}" y="${y}" transform="rotate(${r} ${x} ${y})" font-family="Menlo, monospace" font-size="34" fill="${C.accent}" fill-opacity="${o}">&gt;</text>`,
-  )
+  .map((b) => gull(...b))
   .join('');
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
