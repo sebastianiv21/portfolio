@@ -130,8 +130,8 @@
    layer, and cascade layers outrank specificity — so these overrides must be
    unlayered (unlayered styles beat any layer) to take effect. */
 .prose.prose-gruvbox {
-  --tw-prose-body: var(--color-fg);
-  --tw-prose-headings: var(--color-accent);
+  --tw-prose-body: var(--color-fg-dim);
+  --tw-prose-headings: var(--color-fg);
   --tw-prose-lead: var(--color-fg-dim);
   --tw-prose-links: var(--color-accent);
   --tw-prose-bold: var(--color-fg);
