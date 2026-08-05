@@ -175,10 +175,51 @@ import { nav } from '../data/site';
 
   applyTheme(root.dataset.theme === 'light' ? 'light' : 'dark');
 
-  themeToggle?.addEventListener('click', () => {
+  // Reveal the incoming theme with a circular wipe out of the toggle. The
+  // clip-path runs on the View Transitions snapshot, so the boids canvas
+  // comes along instead of snapping ahead of everything else.
+  function swapTheme(x: number, y: number) {
     const next = root.dataset.theme === 'light' ? 'dark' : 'light';
     localStorage.setItem('theme', next);
-    applyTheme(next);
+
+    if (
+      !document.startViewTransition ||
+      matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      applyTheme(next);
+      return;
+    }
+
+    // Reach the furthest corner of the viewport.
+    const radius = Math.hypot(
+      Math.max(x, innerWidth - x),
+      Math.max(y, innerHeight - y),
+    );
+
+    document
+      .startViewTransition(() => applyTheme(next))
+      .ready.then(() =>
+        root.animate(
+          {
+            clipPath: [
+              `circle(0px at ${x}px ${y}px)`,
+              `circle(${radius}px at ${x}px ${y}px)`,
+            ],
+          },
+          {
+            duration: 400,
+            easing: 'ease-out',
+            pseudoElement: '::view-transition-new(root)',
+          },
+        ),
+      )
+      // A second click mid-wipe skips the first transition, rejecting `ready`.
+      .catch(() => {});
+  }
+
+  themeToggle?.addEventListener('click', (e) => {
+    const box = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    swapTheme(box.left + box.width / 2, box.top + box.height / 2);
   });
 
   // Follow the OS only until the visitor has picked a side themselves.

@@ -128,6 +128,21 @@
   }
 }
 
+/* ── Theme swap ──────────────────────────────────────────────────────────
+   Drop the default cross-fade: the incoming snapshot is painted whole, on
+   top, and revealed by the clip-path Nav.astro animates onto it. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 0;
+}
+::view-transition-new(root) {
+  z-index: 1;
+}
+
 /* ── Reusable Marathon-flavored bits ─────────────────────────────────── */
 @layer components {
   /* corner registration / crop marks on a relatively-positioned box */
