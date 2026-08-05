@@ -15,5 +15,14 @@ export default defineConfig({
     server: { fs: { strict: false } }
   },
 
+  markdown: {
+    shikiConfig: {
+      // Dark is the default color, so it needs no CSS; the light theme rides
+      // along in --shiki-light-* vars that global.css swaps in.
+      themes: { light: 'gruvbox-light-hard', dark: 'gruvbox-dark-hard' },
+      defaultColor: 'dark'
+    }
+  },
+
   integrations: [mdx(), sitemap()]
 });

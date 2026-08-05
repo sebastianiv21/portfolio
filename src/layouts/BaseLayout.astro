@@ -28,6 +28,18 @@ const year = new Date().getFullYear();
     <link rel="canonical" href={canonical} />
     <meta name="generator" content={Astro.generator} />
 
+    {/* Must run before first paint, so: inline and blocking. `is:inline` keeps
+        Astro from hoisting it into a deferred bundle, which would flash the
+        wrong theme. Adding a CSP to public/_headers would require a hash here. */}
+    <script is:inline>
+      const stored = localStorage.getItem('theme');
+      const theme =
+        stored ??
+        (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.style.colorScheme = theme;
+    </script>
+
     <title>{title}</title>
     <meta name="description" content={description} />
 

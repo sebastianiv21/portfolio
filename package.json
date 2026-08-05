@@ -10,6 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "og": "node scripts/generate-og.mjs",
+    "contrast": "node scripts/check-contrast.mjs",
     "astro": "astro"
   },
   "dependencies": {
