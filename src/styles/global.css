@@ -15,10 +15,14 @@
   /* foreground */
   --color-fg: #ebdbb2;
   --color-fg-dim: #a89984;
-  --color-fg-faint: #928374;
+  --color-fg-faint: #968776;
 
-  /* accents — yellow is primary, orange secondary */
+  /* accents — yellow is primary, orange secondary.
+     `accent` carries small text and so owes AA 4.5:1; `accent-display` is for
+     48px+ headlines and non-text marks, which only owe 3:1, and is where the
+     light theme keeps a truer gruvbox yellow. Identical in dark. */
   --color-accent: #fabd2f;
+  --color-accent-display: #fabd2f;
   --color-accent-deep: #d79921;
   --color-orange: #fe8019;
   --color-orange-deep: #d65d0e;
@@ -31,11 +35,46 @@
   --font-display: 'Space Grotesk Variable', system-ui, sans-serif;
 }
 
+/* Boid ink, as raw "r,g,b" triples the canvas can hand straight to rgba().
+   Kept out of @theme because they're never used as Tailwind colors. */
+:root {
+  --boid-colors: 250,189,47 215,153,33 168,153,132;
+  --boid-opacity: 0.4;
+}
+
+/* ── Design tokens: Gruvbox (light) ──────────────────────────────────────
+   @theme emits its tokens as custom properties on :root, so redefining the
+   same names here re-themes every component with no markup changes.
+   The faint foreground and the small-text yellow are darkened past stock
+   gruvbox-light to clear AA on cream — see scripts/check-contrast.mjs. */
+:root[data-theme='light'] {
+  --color-bg-hard: #fbf1c7;
+  --color-bg: #f2e5bc;
+  --color-bg-raised: #ebdbb2;
+  --color-bg-raised-2: #d5c4a1;
+  --color-line: #bdae93;
+
+  --color-fg: #3c3836;
+  --color-fg-dim: #504945;
+  --color-fg-faint: #665c54;
+
+  --color-accent: #8f5f00;
+  --color-accent-display: #a86c10;
+  --color-accent-deep: #6f4a00;
+  --color-orange: #af3a03;
+  --color-orange-deep: #9d0006;
+  --color-aqua: #427b58;
+  --color-red: #9d0006;
+
+  /* Cream washes the flock out; darker ink, carried higher. */
+  --boid-colors: 143,95,0 175,58,3 124,111,100;
+  --boid-opacity: 0.55;
+}
+
 /* ── Base ────────────────────────────────────────────────────────────── */
 @layer base {
   html {
     scroll-behavior: smooth;
-    color-scheme: dark;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -98,7 +137,7 @@
     position: absolute;
     width: 12px;
     height: 12px;
-    border-color: var(--color-accent);
+    border-color: var(--color-accent-display);
     pointer-events: none;
   }
   .crop-marks::before {
@@ -146,6 +185,17 @@
   --tw-prose-pre-bg: var(--color-bg-hard);
   --tw-prose-th-borders: var(--color-line);
   --tw-prose-td-borders: var(--color-line);
+}
+/* Shiki emits both themes per token: the dark one inline, the light one in
+   --shiki-light-*. Those inline styles are what we're overriding, hence the
+   !important. See markdown.shikiConfig in astro.config.mjs. */
+:root[data-theme='light'] .astro-code,
+:root[data-theme='light'] .astro-code span {
+  color: var(--shiki-light) !important;
+  background-color: var(--shiki-light-bg) !important;
+  font-style: var(--shiki-light-font-style) !important;
+  font-weight: var(--shiki-light-font-weight) !important;
+  text-decoration: var(--shiki-light-text-decoration) !important;
 }
 .prose.prose-gruvbox :where(h1, h2, h3, h4) {
   font-family: var(--font-display);
