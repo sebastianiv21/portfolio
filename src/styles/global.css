@@ -37,12 +37,11 @@
 
 /* Boid ink, as raw "r,g,b" triples the canvas can hand straight to rgba().
    Kept out of @theme because they're never used as Tailwind colors.
-   Grain opacity is tuned against --color-fg-dim body text, not headings —
-   cream dirt is louder than charcoal dust at the same value. */
+   Grain lives on card surfaces only — tuned against --color-fg-dim on the
+   card face, not the page wash. */
 :root {
   --boid-colors: 250,189,47 215,153,33 168,153,132;
   --boid-opacity: 0.4;
-  /* Overlay mid-grays cancel hard; under ~0.25 this still reads as flat charcoal. */
   --grain-opacity: 0.4;
   --grain-blend: overlay;
 }
@@ -74,7 +73,7 @@
   /* Cream washes the flock out; darker ink, carried higher. */
   --boid-colors: 143,95,0 175,58,3 124,111,100;
   --boid-opacity: 0.55;
-  /* Cream + overlay vanishes; multiply puts paper tooth on the wash. */
+  /* Cream + overlay vanishes; multiply puts paper tooth on the card. */
   --grain-opacity: 0.22;
   --grain-blend: multiply;
 }
@@ -136,21 +135,29 @@
   }
 }
 
-/* ── Ambient grain ───────────────────────────────────────────────────────
-   Static SVG feTurbulence over the whole page. Behind content at low opacity
-   reads as flat charcoal; the printed feel needs texture on surfaces.
-   feComponentTransfer lifts contrast so mid-gray noise actually shows through
-   overlay. No JS, no animation. */
+/* ── Card grain ──────────────────────────────────────────────────────────
+   Static SVG feTurbulence scoped to card surfaces (not the page wash).
+   isolation keeps mix-blend from eating whatever is behind the card.
+   Uses ::before so it can share an element with .crop-marks (backgrounds). */
 .grain {
-  position: fixed;
+  position: relative;
+  isolation: isolate;
+}
+.grain::before {
+  content: '';
+  position: absolute;
   inset: 0;
-  z-index: 60; /* above nav (z-50) so the grit is uniform, not a cutout */
+  z-index: 0;
   pointer-events: none;
   opacity: var(--grain-opacity);
   mix-blend-mode: var(--grain-blend);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='3' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='1.4' intercept='-0.2'/%3E%3CfeFuncG type='linear' slope='1.4' intercept='-0.2'/%3E%3CfeFuncB type='linear' slope='1.4' intercept='-0.2'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 120px 120px;
   background-repeat: repeat;
+}
+.grain > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* ── Theme swap ──────────────────────────────────────────────────────────
@@ -170,27 +177,24 @@
 
 /* ── Reusable Marathon-flavored bits ─────────────────────────────────── */
 @layer components {
-  /* corner registration / crop marks on a relatively-positioned box */
-  .crop-marks::before,
-  .crop-marks::after {
-    content: '';
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    border-color: var(--color-accent-display);
-    pointer-events: none;
-  }
-  .crop-marks::before {
-    top: 0;
-    left: 0;
-    border-top: 2px solid;
-    border-left: 2px solid;
-  }
-  .crop-marks::after {
-    bottom: 0;
-    right: 0;
-    border-bottom: 2px solid;
-    border-right: 2px solid;
+  /* Corner registration marks via backgrounds — frees ::before for .grain. */
+  .crop-marks {
+    background-image:
+      linear-gradient(var(--color-accent-display), var(--color-accent-display)),
+      linear-gradient(var(--color-accent-display), var(--color-accent-display)),
+      linear-gradient(var(--color-accent-display), var(--color-accent-display)),
+      linear-gradient(var(--color-accent-display), var(--color-accent-display));
+    background-size:
+      12px 2px,
+      2px 12px,
+      12px 2px,
+      2px 12px;
+    background-position:
+      left top,
+      left top,
+      right bottom,
+      right bottom;
+    background-repeat: no-repeat;
   }
 
   /* technical mono label, e.g. "// 01 — ABOUT" */
