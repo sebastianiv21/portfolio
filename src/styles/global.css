@@ -42,7 +42,9 @@
 :root {
   --boid-colors: 250,189,47 215,153,33 168,153,132;
   --boid-opacity: 0.4;
-  --grain-opacity: 0.06;
+  /* Overlay mid-grays cancel hard; under ~0.25 this still reads as flat charcoal. */
+  --grain-opacity: 0.4;
+  --grain-blend: overlay;
 }
 
 /* ── Design tokens: Gruvbox (light) ──────────────────────────────────────
@@ -72,8 +74,9 @@
   /* Cream washes the flock out; darker ink, carried higher. */
   --boid-colors: 143,95,0 175,58,3 124,111,100;
   --boid-opacity: 0.55;
-  /* Lower than dark: same opacity on #fbf1c7 reads as dirt. */
-  --grain-opacity: 0.035;
+  /* Cream + overlay vanishes; multiply puts paper tooth on the wash. */
+  --grain-opacity: 0.22;
+  --grain-blend: multiply;
 }
 
 /* ── Base ────────────────────────────────────────────────────────────── */
@@ -134,16 +137,19 @@
 }
 
 /* ── Ambient grain ───────────────────────────────────────────────────────
-   Static SVG feTurbulence overlay. Above the boids canvas (-z-10), below
-   content. No JS, no animation — reduced-motion is a no-op. */
+   Static SVG feTurbulence over the whole page. Behind content at low opacity
+   reads as flat charcoal; the printed feel needs texture on surfaces.
+   feComponentTransfer lifts contrast so mid-gray noise actually shows through
+   overlay. No JS, no animation. */
 .grain {
   position: fixed;
   inset: 0;
-  z-index: -9;
+  z-index: 60; /* above nav (z-50) so the grit is uniform, not a cutout */
   pointer-events: none;
   opacity: var(--grain-opacity);
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: var(--grain-blend);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='3' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='1.4' intercept='-0.2'/%3E%3CfeFuncG type='linear' slope='1.4' intercept='-0.2'/%3E%3CfeFuncB type='linear' slope='1.4' intercept='-0.2'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
   background-repeat: repeat;
 }
 
